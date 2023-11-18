@@ -1,0 +1,138 @@
+Zombie-Orphan
+
+//zombie
+#include<sys/types.h>
+#include<sys/wait.h>
+#include<unistd.h>
+#include<stdio.h>
+
+int main()
+{
+    pid_t pid;
+    pid = fork();
+
+    if (pid == 0)
+    {
+        sleep(5);
+        printf("\n\nHello I am a child process:");
+        printf("\nMy process id is: %d", getpid());
+        printf("\nMy parent process id is: %d", getppid());
+    }
+    else
+    {
+        printf("\n\n");
+        sleep(5);
+        pid = wait(NULL);  // Corrected wait call
+        printf("\n\nHello I am a parent process:");
+        printf("\nMy process id is: %d", getpid());
+        printf("\nMy parent process id is: %d", getppid());
+        printf("\nMy child process id is: %d", pid);
+    }
+
+    return 0;
+}
+
+//orphan
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int main()
+{
+	pid_t pid;
+	pid=fork();
+	
+	if(pid==0)
+	{
+		sleep(5);
+		printf("\n\nHello Iam a child process :");
+		printf("\nMy process id is :%d",getpid());
+		printf("\nMy parent process id is :%d",getpid());
+	}
+	else
+	{
+		printf("\n\nHello I am a parent process :");
+		printf("\nMy process id is :%d",getpid());
+		printf("\nMy parent process id is :%d",getpid());
+		printf("\nMy child process id is :%d",pid);
+	}
+}
+
+//Sorting
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int main() {
+    pid_t pid;
+    int n;
+    int temp;
+
+    printf("Enter size of the array: ");
+    scanf("%d", &n);
+
+    int arr[n];
+
+    printf("Enter elements in the array: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    pid = fork();
+
+    if (pid == 0) {
+        // Child process
+        printf("\nHello! I am the child process (sorting in ascending order)\n");
+        
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+        }
+
+        printf("My process id is: %d\n", getpid());
+        printf("My parent process id is: %d\n", getppid());
+        printf("Sorted array in ascending order: ");
+        
+        for (int i = 0; i < n; i++) {
+            printf("%d\t", arr[i]);
+        }
+
+        printf("\n");
+    } else {
+        // Parent process
+        wait(NULL); // Wait for the child process to finish
+
+        printf("\nHello! I am the parent process (sorting in descending order):\n");
+        
+        printf("My process id is: %d\n", getpid());
+        printf("My child process id is: %d\n", pid);
+        
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] < arr[j + 1]) {
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+        }
+
+        printf("Sorted array in descending order: ");
+        
+        for (int i = 0; i < n; i++) {
+            printf("%d\t", arr[i]);
+        }
+
+        printf("\n");
+    }
+
+    return 0;
+}
