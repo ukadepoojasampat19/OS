@@ -1,0 +1,215 @@
+Disk sheduling 
+
+//SSTF
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#define Max_Req 100
+void sstf(int req[], int n,int ini_head)
+{
+int curr_head=ini_head;
+int total_seek=0;
+int visited[Max_Req]={0};
+for(int i=0;i<n;i++)
+{
+visited[i]=0;
+}
+for(int i=0;i<n;i++)
+{
+int next_req=-1;
+int min_seek=INT_MAX;
+for(int j=0;j<n;j++)
+{
+if(!visited[j])
+{
+int seek=abs(curr_head-req[j]);
+if(seek<min_seek)
+{
+min_seek=seek;
+next_req=j;
+}
+}
+}
+visited[next_req]=1;
+total_seek+=min_seek;
+printf("move from %d to %d (seek time: %d)\n)", curr_head, req[next_req],
+min_seek);
+printf("Total Seek: %d", total_seek);
+curr_head=req[next_req];
+}
+}
+int main()
+{
+int n;
+printf("n:");
+scanf("%d", &n);
+int inhead;
+printf("inhead:");
+scanf("%d",&inhead);
+int req[n];
+printf("Req: ");
+for(int i=0;i<n;i++)
+{
+scanf("%d", &req[i]);
+}
+sstf(req, n, inhead);
+}
+
+
+//SCAN
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#define MAX_REQUESTS 100
+// Function to sort an array in ascending order
+void sort(int arr[], int n)
+{
+int temp;
+for (int i = 0; i < n; i++)
+{
+for (int j = i + 1; j < n; j++)
+{
+if (arr[i] > arr[j])
+{
+temp = arr[i];
+arr[i] = arr[j];
+arr[j] = temp;
+}
+}
+}
+}
+// Function to simulate SCAN algorithm
+void scan(int requests[], int n, int initial_head, int max_track)
+{
+int total_seek_time = 0;
+int current_head = initial_head;
+// Sort the requests in ascending order
+sort(requests, n);
+// Find the index of the requests which is just greater than the current head
+int initial_index = 0;
+while (initial_index < n && requests[initial_index] <= initial_head)
+{
+initial_index++;
+}
+// Move the head to the last request
+total_seek_time += abs(current_head - max_track);
+for(int i=initial_index;i<n;i++)
+{
+printf("Move from %d to %d (Seek Time: %d)\n", current_head,
+requests[i],abs(current_head - requests[i]));
+current_head=requests[i];
+}
+//Move the head to 199(max_track)
+printf("Move from %d to %d (Seek Time: %d)\n", current_head, max_track
+,abs(current_head - max_track));
+current_head=max_track;
+//Move head to request which is before initial_index
+printf("Move from %d to %d (Seek Time: %d)\n", current_head,
+requests[initial_index-1] ,abs(current_head - requests[initial_index-1]));
+total_seek_time+=abs(current_head - requests[initial_index-1]);
+current_head=requests[initial_index-1];
+for(int i=initial_index-1;i>0;i–)
+{
+printf("Move from %d to %d (Seek Time: %d)\n", current_head, requests[i-1] ,
+abs(current_head - requests[i-1]));
+total_seek_time+=abs(current_head - requests[i-1]);
+current_head=requests[i-1];
+}
+printf("\nTotal seek time: %d", total_seek_time);
+}
+int main()
+{
+int n;
+printf("n:");
+scanf("%d", &n);
+int inhead;
+printf("inhead:");
+scanf("%d",&inhead);
+int max_track;
+printf("max_track:");
+scanf("%d",&max_track);
+int requests[n];
+printf("Req: ");
+for(int i=0;i<n;i++)
+{
+scanf("%d", &requests[i]);
+}
+scan(requests, n, inhead, max_track);
+}
+
+
+//C LOOK
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#define MAX_REQUESTS 100
+// Function to sort an array in ascending order
+void sort(int arr[], int n)
+{
+int temp;
+for (int i = 0; i < n; i++)
+{
+for (int j = i + 1; j < n; j++)
+{
+if (arr[i] > arr[j])
+{
+temp = arr[i];
+arr[i] = arr[j];
+arr[j] = temp;
+}
+}
+}
+}
+// Function to simulate SCAN algorithm
+void scan(int requests[], int n, int initial_head, int max_track)
+{
+int total_seek_time = 0;
+int current_head = initial_head;
+// Sort the requests in ascending order
+sort(requests, n);
+// Find the index of the requests which is just greater than the current head
+int initial_index = 0;
+while (initial_index < n && requests[initial_index] <= initial_head)
+{
+initial_index++;
+}
+// Move the head to the last request
+for(int i=initial_index;i<n;i++)
+{
+printf("Move from %d to %d (Seek Time: %d)\n", current_head,
+requests[i],abs(current_head - requests[i]));
+total_seek_time += abs(current_head - requests[i]);
+current_head=requests[i];
+}
+//Move head to request which is in the starting
+printf("Move from %d to %d (Seek Time: %d)\n", current_head, requests[0]
+,abs(current_head - requests[0]));
+total_seek_time+=abs(current_head - requests[0]);
+current_head=requests[0];
+for(int i=1;i<initial_index;i++)
+{
+printf("Move from %d to %d (Seek Time: %d)\n", current_head,
+requests[i],abs(current_head - requests[i]));
+total_seek_time+=abs(current_head - requests[i]);
+current_head=requests[i];
+}
+printf("\nTotal seek time: %d", total_seek_time);
+}
+int main()
+{
+int n;
+printf("n:");
+scanf("%d", &n);
+int inhead;
+printf("inhead:");
+scanf("%d",&inhead);
+int max_track;
+printf("max_track:");
+scanf("%d",&max_track);
+int requests[n];
+printf("Req: ");
+for(int i=0;i<n;i++)
+{
+scanf("%d", &requests[i]);
+}
+scan(requests, n, inhead, max_track)
