@@ -1,0 +1,60 @@
+//Producer-consumer
+#include <stdio.h>
+#include <semaphore.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+#define BUFFER_SIZE 10
+
+int buffer[5];
+int in = 0;
+int out = 0;
+sem_t empty_slots, full_slots, s;
+
+void *producer(void *arg) {
+    int data;
+    sem_wait(&empty_slots);  // Wait for an empty slot
+    sem_wait(&s);            // Acquire the semaphore for mutual exclusion
+    printf("Enter the produced data: ");
+    scanf("%d", &data);
+    buffer[in] = data;
+    printf("Product entered by %ld successfully: %d\n", pthread_self(), data);
+    in = (in + 1) % BUFFER_SIZE;
+    sem_post(&s);            // Release the semaphore
+    sem_post(&full_slots);   // Signal that a slot is filled
+}
+
+void *consumer(void *arg) {
+    int val;
+    sem_wait(&full_slots);   // Wait for a filled slot
+    sem_wait(&s);            // Acquire the semaphore for mutual exclusion
+    val = buffer[out];
+    printf("Product consumed by %ld successfully: %d\n", pthread_self(), val);
+    out = (out + 1) % BUFFER_SIZE;
+    sem_post(&s);            // Release the semaphore
+    sem_post(&empty_slots);  // Signal that an empty slot is available
+   
+}
+
+int main() {
+    pthread_t tid[5], ctid;
+
+    sem_init(&empty_slots, 0, 5);
+    sem_init(&full_slots, 0, 0);
+    sem_init(&s, 0, 1);
+
+    for (int i = 0; i < 5; i++) {
+        pthread_create(&tid[i], NULL, producer, NULL);
+    }
+    pthread_create(&ctid, NULL, consumer, NULL);
+    for (int i = 0; i < 5; i++) {
+        pthread_join(tid[i], NULL);
+    }
+    pthread_join(ctid, NULL);
+
+    sem_destroy(&empty_slots);
+    sem_destroy(&full_slots);
+    sem_destroy(&s);
+
+    return 0;
+}
