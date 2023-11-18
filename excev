@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+void Func(char *arr[], int argc, char *argv[]) {
+    int i;
+
+    for (i = 0; i < argc - 1; i++) {
+        arr[i] = argv[i + 1];
+    }
+    arr[i] = NULL;
+
+    printf("Array elements are: \n");
+    for (i = 0; i < argc - 1; i++) {
+        printf("%s\t", arr[i]);
+    }
+    printf("\n");
+
+    int n = argc - 1;
+    printf("Total Size of N is %d \n", n);
+
+    for (int j = 0; j < argc - 1; j++) {
+        for (int k = 0; k < argc - j - 2; k++) {
+            if (atoi(arr[k + 1]) < atoi(arr[k])) {
+                char *temp = arr[k];
+                arr[k] = arr[k + 1];
+                arr[k + 1] = temp;
+            }
+        }
+    }
+
+    printf("Array elements after sorting are: \n");
+    for (i = 0; i < argc - 1; i++) {
+        printf("%s\t", arr[i]);
+    }
+    printf("\n");
+}
+
+int main(int argc, char *argv[]) {
+    char *arr[argc + 1]; // +1 for NULL at the end
+    arr[0] = argv[0];
+
+    Func(arr, argc, argv);
+
+    pid_t pid;
+    pid = fork();
+
+    if (pid == 0) {
+        printf("\nChild Process ID is %d ", getpid());
+        printf("\nChild's Parent Process ID is %d \n", getppid());
+        execv(arr[0], arr);
+    } else {
+        wait(NULL);
+        printf("\nParent Process ID is %d \n", getpid());
+        printf("Parent Parent's Process ID is %d \n", getppid());
+    }
+}
