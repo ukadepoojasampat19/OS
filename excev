@@ -1,59 +1,65 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/wait.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
-void Func(char *arr[], int argc, char *argv[]) {
-    int i;
+int main(int argc, char *argv[]) {
+    pid_t processid;
+    int n = argc;
 
-    for (i = 0; i < argc - 1; i++) {
-        arr[i] = argv[i + 1];
+    processid = fork();
+
+    if (processid == -1) {
+        perror("fork failed");
+        exit(1);
     }
-    arr[i] = NULL;
 
-    printf("Array elements are: \n");
-    for (i = 0; i < argc - 1; i++) {
-        printf("%s\t", arr[i]);
-    }
-    printf("\n");
+    if (processid == 0) {
+        printf("\nChild process id: %d\n", getpid());
+        printf("Child Parent process id: %d\n", getppid());
 
-    int n = argc - 1;
-    printf("Total Size of N is %d \n", n);
+        // Copy and sort the arguments
+        int* array = (int*)malloc((n - 1) * sizeof(int));
+        for (int i = 1; i < n; i++) {
+            array[i - 1] = atoi(argv[i]);
+        }
 
-    for (int j = 0; j < argc - 1; j++) {
-        for (int k = 0; k < argc - j - 2; k++) {
-            if (atoi(arr[k + 1]) < atoi(arr[k])) {
-                char *temp = arr[k];
-                arr[k] = arr[k + 1];
-                arr[k + 1] = temp;
+        // Bubble sort the array
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (array[j] > array[j + 1]) {
+                    int temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                }
             }
+        }
+
+        // Print the sorted elements
+        printf("The elements stored in array (after sorting) are:\n");
+        for (int i = 0; i < n - 1; i++) {
+            printf("%d\n", array[i]);
+        }
+
+        // Execute a new program with sorted arguments
+        char* execArgs[n];
+        for (int i = 0; i < n; i++) {
+            execArgs[i] = argv[i];
+        }
+        execArgs[n - 1] = NULL;
+
+        execvp(execArgs[0], execArgs);
+        perror("execvp failed");
+        exit(1);
+    } else {
+        int status;
+        wait(&status);
+        if (WIFEXITED(status)) {
+            printf("Parent process id: %d\n", getpid());
+            printf("Parent parent process id: %d\n", getppid());
         }
     }
 
-    printf("Array elements after sorting are: \n");
-    for (i = 0; i < argc - 1; i++) {
-        printf("%s\t", arr[i]);
-    }
-    printf("\n");
-}
-
-int main(int argc, char *argv[]) {
-    char *arr[argc + 1]; // +1 for NULL at the end
-    arr[0] = argv[0];
-
-    Func(arr, argc, argv);
-
-    pid_t pid;
-    pid = fork();
-
-    if (pid == 0) {
-        printf("\nChild Process ID is %d ", getpid());
-        printf("\nChild's Parent Process ID is %d \n", getppid());
-        execv(arr[0], arr);
-    } else {
-        wait(NULL);
-        printf("\nParent Process ID is %d \n", getpid());
-        printf("Parent Parent's Process ID is %d \n", getppid());
-    }
+    return 0;
 }
